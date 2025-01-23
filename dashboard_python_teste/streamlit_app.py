@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -133,9 +134,10 @@ with tab1:
         x='Categoria_Gasto',
         y='Valor_Transação',
         text_auto=True,
+        title="Gastos por Categoria",
         labels={'Categoria_Gasto': 'Categoria', 'Valor_Transação': 'Total (R$)'}
     )
-    fig_categoria.update_layout(title_x=0.5)
+    fig_categoria.update_layout(title_text="Gastos por Categoria", title_x=0.5)
     st.plotly_chart(fig_categoria, use_container_width=True)
 
     st.subheader("Inadimplência por Região")
@@ -145,19 +147,19 @@ with tab1:
         grafico_inadimplencia,
         values='ID_Cliente',
         names='Região',
+        title="Distribuição de Inadimplência por Região",
         labels={'ID_Cliente': 'Clientes'},
         color_discrete_sequence=px.colors.sequential.Reds
     )
-    fig_inadimplencia.update_layout(title_x=0.5)
+    fig_inadimplencia.update_layout(title_text="Distribuição de Inadimplência por Região", title_x=0.5)
     st.plotly_chart(fig_inadimplencia, use_container_width=True)
 
 # Conteúdo da aba 2
 with tab2:
     st.subheader("Sugestões e Observações")
     st.write("""
-    - Clientes **Gold** têm maior concentração de gastos em 'Alimentação'. Parcerias com restaurantes podem aumentar a fidelidade.
-    - Clientes **Black** gastam mais em 'Viagem'. Promoções em hotéis e passagens podem atrair novos clientes.
-    - A região **Sudeste** concentra a maior parte dos inadimplentes. Reforce análises de crédito e políticas na região.
-    - **Cashback** é atrativo: participantes gastam, em média, 25% a mais. Expanda para outras categorias.
+    - Clientes **Black** têm maior concentração de gastos em 'Viagens'. **Sugestão:** Parcerias com restaurantes podem aumentar a fidelidade.
+    - Clientes **Gold** gastam mais em 'Viagem'. **Sugestão:** Promoções em hotéis e passagens podem atrair novos clientes.
+    - A região **Nordeste** concentra a maior parte dos inadimplentes. **Sugestão:** Reforce análises de crédito e políticas na região.
+    - **Cashback** é atrativo: participantes gastam, em média, 25% a mais. Expanda para mais categorias.
     """)
-

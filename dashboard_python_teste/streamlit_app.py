@@ -3,33 +3,44 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 
-# Dados simulados
-transacoes = pd.DataFrame({
-    'Data_Transação': pd.date_range(start='2024-01-01', periods=1000, freq='D'),
-    'ID_Cliente': np.random.randint(1, 101, size=1000),
-    'Tipo_Cartão': np.random.choice(['Gold', 'Platinum', 'Black'], size=1000, p=[0.5, 0.3, 0.2]),
-    'Valor_Transação': np.random.uniform(50, 2000, size=1000).round(2),
-    'Categoria_Gasto': np.random.choice(['Alimentação', 'Viagem', 'Compras Online', 'Educação'], size=1000),
-    'Limite_Cartão': np.random.uniform(5000, 20000, size=1000).round(-2)
-})
+# Fixando a semente para valores aleatórios consistentes
+np.random.seed(42)
 
-clientes = pd.DataFrame({
-    'ID_Cliente': range(1, 101),
-    'Idade': np.random.randint(18, 65, size=100),
-    'Renda_Mensal': np.random.uniform(2000, 15000, size=100).round(-2),
-    'Status_Inadimplente': np.random.choice([0, 1], size=100, p=[0.85, 0.15]),
-    'Tipo_Cartão': np.random.choice(['Gold', 'Platinum', 'Black'], size=100, p=[0.5, 0.3, 0.2]),
-    'Região': np.random.choice(['Norte', 'Sul', 'Sudeste', 'Nordeste'], size=100)
-})
+# Cache para dados simulados
+@st.cache_data
+def carregar_dados():
+    transacoes = pd.DataFrame({
+        'Data_Transação': pd.date_range(start='2024-01-01', periods=1000, freq='D'),
+        'ID_Cliente': np.random.randint(1, 101, size=1000),
+        'Tipo_Cartão': np.random.choice(['Gold', 'Platinum', 'Black'], size=1000, p=[0.5, 0.3, 0.2]),
+        'Valor_Transação': np.random.uniform(50, 2000, size=1000).round(2),
+        'Categoria_Gasto': np.random.choice(['Alimentação', 'Viagem', 'Compras Online', 'Educação'], size=1000),
+        'Limite_Cartão': np.random.uniform(5000, 20000, size=1000).round(-2)
+    })
 
-beneficios = pd.DataFrame({
-    'ID_Cliente': range(1, 101),
-    'Participa_Cashback': np.random.choice([0, 1], size=100, p=[0.4, 0.6]),
-    'Participa_Pontos': np.random.choice([0, 1], size=100, p=[0.3, 0.7]),
-    'Saldo_Pontos': np.random.randint(0, 5000, size=100)
-})
+    clientes = pd.DataFrame({
+        'ID_Cliente': range(1, 101),
+        'Idade': np.random.randint(18, 65, size=100),
+        'Renda_Mensal': np.random.uniform(2000, 15000, size=100).round(-2),
+        'Status_Inadimplente': np.random.choice([0, 1], size=100, p=[0.85, 0.15]),
+        'Tipo_Cartão': np.random.choice(['Gold', 'Platinum', 'Black'], size=100, p=[0.5, 0.3, 0.2]),
+        'Região': np.random.choice(['Norte', 'Sul', 'Sudeste', 'Nordeste'], size=100)
+    })
 
-transacoes_completas = pd.merge(transacoes, beneficios, on='ID_Cliente')
+    beneficios = pd.DataFrame({
+        'ID_Cliente': range(1, 101),
+        'Participa_Cashback': np.random.choice([0, 1], size=100, p=[0.4, 0.6]),
+        'Participa_Pontos': np.random.choice([0, 1], size=100, p=[0.3, 0.7]),
+        'Saldo_Pontos': np.random.randint(0, 5000, size=100)
+    })
+
+    transacoes_completas = pd.merge(transacoes, beneficios, on='ID_Cliente')
+
+    return transacoes, clientes, beneficios, transacoes_completas
+
+
+# Carregando os dados
+transacoes, clientes, beneficios, transacoes_completas = carregar_dados()
 
 # Função para formatar valores
 def formatar_valor(valor):
@@ -157,8 +168,8 @@ with tab1:
 with tab2:
     st.subheader("Sugestões e Observações")
     st.write("""
-    - Clientes **Black** têm maior concentração de gastos em 'Viagens'. **Sugestão:** Parcerias com restaurantes podem aumentar a fidelidade.
-    - Clientes **Gold** gastam mais em 'Viagem'. **Sugestão:** Promoções em hotéis e passagens podem atrair novos clientes.
-    - A região **Nordeste** concentra a maior parte dos inadimplentes. **Sugestão:** Reforce análises de crédito e políticas na região.
-    - **Cashback** é atrativo: participantes gastam, em média, 25% a mais. Expanda para mais categorias.
+    - Clientes **Gold** têm maior concentração de gastos em 'Alimentação'. Parcerias com restaurantes podem aumentar a fidelidade.
+    - Clientes **Black** gastam mais em 'Viagem'. Promoções em hotéis e passagens podem atrair novos clientes.
+    - A região **Sudeste** concentra a maior parte dos inadimplentes. Reforce análises de crédito e políticas na região.
+    - **Cashback** é atrativo: participantes gastam, em média, 25% a mais. Expanda para outras categorias.
     """)

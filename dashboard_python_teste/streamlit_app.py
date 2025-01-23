@@ -35,15 +35,10 @@ transacoes_completas = pd.merge(transacoes, beneficios, on='ID_Cliente')
 def formatar_valor(valor):
     return f"R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
 
-# Estilo CSS para centralizar e organizar o layout
+# Estilo CSS para responsividade
 st.markdown(
     """
     <style>
-    .main-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
     .title {
         text-align: center;
         color: white;
@@ -51,32 +46,40 @@ st.markdown(
         padding: 15px;
         border-radius: 5px;
         font-size: 2em;
-        margin-bottom: 20px;
-    }
-    .metric-container {
-        display: flex;
-        justify-content: space-between;
-        gap: 20px;
-        flex-wrap: wrap;
     }
     .metric-card {
-        flex: 1;
-        min-width: 220px;
         background-color: #f9f9f9;
-        padding: 15px;
+        padding: 10px;
         border-radius: 10px;
-        border: 1px solid #ddd;
+        margin: 10px;
         text-align: center;
+        border: 1px solid #ddd;
+        flex: 1 1 calc(25% - 20px);
+        box-sizing: border-box;
+    }
+    .metric-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+    .metric-title {
+        font-size: 1.2em;
+        margin-bottom: 5px;
+        color: #333;
+    }
+    .metric-value {
+        font-size: 2em;
+        font-weight: bold;
+        margin: 10px 0;
+        color: #003B70;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
 
-# Layout principal
-st.markdown('<div class="main-container">', unsafe_allow_html=True)
+# Título do app
 st.markdown('<div class="title">Dashboard de Cartões de Crédito</div>', unsafe_allow_html=True)
-
 st.subheader("Análise de transações, inadimplência e benefícios")
 
 # Filtros
@@ -96,53 +99,39 @@ total_cashback = formatar_valor(
     transacoes_completas[transacoes_completas['Participa_Cashback'] == 1]['Valor_Transação'].sum()
 )
 
-# Exibindo métricas centralizadas
+# Exibindo métricas responsivas
 st.markdown("### Métricas Gerais")
-st.markdown('<div class="metric-container">', unsafe_allow_html=True)
 st.markdown(
     f"""
-    <div class="metric-card" style="background-color: #E8F4FF;">
-        <h4>Total de Transações 💳</h4>
-        <h2>{total_transacoes}</h2>
-        <p>Valor total movimentado no período.</p>
+    <div class="metric-row">
+        <div class="metric-card" style="background-color: #E8F4FF;">
+            <div class="metric-title">Total de Transações 💳</div>
+            <div class="metric-value">{total_transacoes}</div>
+            <small>Valor total movimentado no período.</small>
+        </div>
+        <div class="metric-card" style="background-color: #F0F8FF;">
+            <div class="metric-title">Gasto Médio por Transação 📊</div>
+            <div class="metric-value">{media_gasto}</div>
+            <small>Média do valor gasto por transação.</small>
+        </div>
+        <div class="metric-card" style="background-color: #FFE8E8;">
+            <div class="metric-title">Total de Inadimplentes 🚨</div>
+            <div class="metric-value">{total_inadimplentes}</div>
+            <small>Número de clientes inadimplentes.</small>
+        </div>
+        <div class="metric-card" style="background-color: #E8FFE8;">
+            <div class="metric-title">Total de Cashback Usado 🤑</div>
+            <div class="metric-value">{total_cashback}</div>
+            <small>Total resgatado em benefícios.</small>
+        </div>
     </div>
     """,
     unsafe_allow_html=True
 )
-st.markdown(
-    f"""
-    <div class="metric-card" style="background-color: #F0F8FF;">
-        <h4>Gasto Médio por Transação 📊</h4>
-        <h2>{media_gasto}</h2>
-        <p>Média do valor gasto por transação.</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-st.markdown(
-    f"""
-    <div class="metric-card" style="background-color: #FFE8E8;">
-        <h4>Total de Inadimplentes 🚨</h4>
-        <h2>{total_inadimplentes}</h2>
-        <p>Número de clientes inadimplentes.</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-st.markdown(
-    f"""
-    <div class="metric-card" style="background-color: #E8FFE8;">
-        <h4>Total de Cashback Usado 🤑</h4>
-        <h2>{total_cashback}</h2>
-        <p>Total resgatado em benefícios.</p>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-st.markdown('</div>', unsafe_allow_html=True)
 
 # Gráficos
-st.subheader("Gráficos")
+st.markdown("### Gráficos")
+st.subheader("Gastos por Categoria")
 grafico_categorias = dados_filtrados.groupby('Categoria_Gasto')['Valor_Transação'].sum().reset_index()
 fig_categoria = px.bar(
     grafico_categorias,
@@ -168,5 +157,3 @@ fig_inadimplencia = px.pie(
 )
 fig_inadimplencia.update_layout(title_x=0.5)
 st.plotly_chart(fig_inadimplencia, use_container_width=True)
-
-st.markdown('</div>', unsafe_allow_html=True)

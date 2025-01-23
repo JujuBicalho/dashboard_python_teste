@@ -100,7 +100,6 @@ total_cashback = formatar_valor(
 )
 
 # Exibindo métricas responsivas
-st.markdown("### Métricas Gerais")
 st.markdown(
     f"""
     <div class="metric-row">
@@ -130,7 +129,6 @@ st.markdown(
 )
 
 # Gráficos
-#st.markdown("### Gráficos")
 st.subheader("Gastos por Categoria")
 grafico_categorias = dados_filtrados.groupby('Categoria_Gasto')['Valor_Transação'].sum().reset_index()
 fig_categoria = px.bar(

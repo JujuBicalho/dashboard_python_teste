@@ -35,21 +35,16 @@ transacoes_completas = pd.merge(transacoes, beneficios, on='ID_Cliente')
 def formatar_valor(valor):
     return f"R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
 
-# Estilo CSS para layout organizado
+# Estilo CSS para layout
 st.markdown(
     """
     <style>
-    .main-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 0 20px;
-    }
-    .metric-row {
+    .metric-container {
         display: flex;
         justify-content: space-between;
         flex-wrap: wrap;
-        margin-top: 10px;
-        gap: 10px;
+        margin-top: 20px;
+        gap: 20px;
     }
     .metric-card {
         flex: 1;
@@ -59,6 +54,7 @@ st.markdown(
         border-radius: 10px;
         border: 1px solid #ddd;
         text-align: center;
+        font-size: 16px;
     }
     </style>
     """,
@@ -66,7 +62,6 @@ st.markdown(
 )
 
 # Título do app
-st.markdown('<div class="main-container">', unsafe_allow_html=True)
 st.title("Dashboard de Cartões de Crédito")
 st.subheader("Análise de transações, inadimplência e benefícios")
 
@@ -112,8 +107,7 @@ with tab2:
     """)
 
 # Métricas principais
-st.markdown("### Métricas Gerais")
-st.markdown('<div class="metric-row">', unsafe_allow_html=True)
+st.markdown('<div class="metric-container">', unsafe_allow_html=True)
 st.markdown(
     f"""
     <div class="metric-card" style="background-color: #E8F4FF;">
@@ -154,5 +148,4 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-st.markdown('</div>', unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)

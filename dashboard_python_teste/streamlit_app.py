@@ -1,16 +1,9 @@
-# Importando as bibliotecas necessárias
 import streamlit as st
-import dash
-from dash import dcc, html, Input, Output
 import pandas as pd
 import numpy as np
 import plotly.express as px
 
-# Função para formatar valores no padrão brasileiro
-def formatar_valor(valor):
-    return f"R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
-
-# Criando os dados simulados
+# Dados simulados
 transacoes = pd.DataFrame({
     'Data_Transação': pd.date_range(start='2024-01-01', periods=1000, freq='D'),
     'ID_Cliente': np.random.randint(1, 101, size=1000),
@@ -38,88 +31,91 @@ beneficios = pd.DataFrame({
 
 transacoes_completas = pd.merge(transacoes, beneficios, on='ID_Cliente')
 
-# Criando o app Dash
-app = dash.Dash(__name__)
-app.title = "Dashboard Profissional"
+# Função para formatar valores
+def formatar_valor(valor):
+    return f"R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
 
-# Função para calcular métricas gerais
-def calcular_metricas():
-    total_transacoes = transacoes['Valor_Transação'].sum()
-    media_gasto = transacoes['Valor_Transação'].mean()
-    total_inadimplentes = clientes['Status_Inadimplente'].sum()
-    total_cashback = transacoes_completas[transacoes_completas['Participa_Cashback'] == 1]['Valor_Transação'].sum()
-    return total_transacoes, media_gasto, total_inadimplentes, total_cashback
+# Título do app
+st.title("Dashboard de Cartões de Crédito")
+st.write("Análise de transações, inadimplência e benefícios")
 
-# Layout do Dashboard
-app.layout = html.Div([
-    # Título do Dashboard
-    html.Div([
-        html.H1("Dashboard de Cartões de Crédito", style={'text-align': 'center', 'color': 'white'}),
-        html.P("Análise de transações, inadimplência e benefícios", style={'text-align': 'center', 'color': 'white'})
-    ], style={'background-color': '#003B70', 'padding': '10px'}),
-    
-    # Abas para organizar o conteúdo
-    dcc.Tabs([
-        # Aba 1: Gráficos
-        dcc.Tab(label='Análises Gráficas', children=[
-            # Dropdown para seleção de tipo de cartão
-            html.Div([
-                html.Label("Selecione o Tipo de Cartão:", style={'font-size': '16px', 'margin-top': '20px'}),
-                dcc.Dropdown(
-                    id='tipo_cartao',
-                    options=[
-                        {'label': 'Todos', 'value': 'Todos'},
-                        {'label': 'Gold', 'value': 'Gold'},
-                        {'label': 'Platinum', 'value': 'Platinum'},
-                        {'label': 'Black', 'value': 'Black'}
-                    ],
-                    value='Todos',  # Valor padrão
-                    style={'width': '50%', 'margin': '20px auto'}
-                )
-            ], style={'text-align': 'center'}),
+# Filtros
+tipo_cartao = st.selectbox(
+    "Selecione o Tipo de Cartão:",
+    options=['Todos', 'Gold', 'Platinum', 'Black']
+)
 
-            # Cartões de Métricas
-            html.Div([
-                html.Div([
-                    html.H4("Total de Transações 💳", style={'text-align': 'center', 'color': 'black'}),
-                    html.H3(formatar_valor(calcular_metricas()[0]), style={'text-align': 'center', 'color': '#003B70'}),
-                    html.P("Valor total movimentado por todas as transações no período.", style={'text-align': 'center', 'font-size': '12px'}),
-                ], className='card', style={'background-color': '#E8F4FF', 'border': '1px solid #003B70', 'padding': '15px', 'border-radius': '10px'}),
-                html.Div([
-                    html.H4("Gasto Médio por Transação 📊", style={'text-align': 'center', 'color': 'black'}),
-                    html.H3(formatar_valor(calcular_metricas()[1]), style={'text-align': 'center', 'color': '#007ACC'}),
-                    html.P("Média do valor gasto em cada transação.", style={'text-align': 'center', 'font-size': '12px'}),
-                ], className='card', style={'background-color': '#F0F8FF', 'border': '1px solid #007ACC', 'padding': '15px', 'border-radius': '10px'}),
-                html.Div([
-                    html.H4("Total de Inadimplentes 🚨", style={'text-align': 'center', 'color': 'black'}),
-                    html.H3(f"{calcular_metricas()[2]:,}".replace(',', '.'), style={'text-align': 'center', 'color': '#CC0000'}),
-                    html.P("Número de clientes inadimplentes no período analisado.", style={'text-align': 'center', 'font-size': '12px'}),
-                ], className='card', style={'background-color': '#FFE8E8', 'border': '1px solid #CC0000', 'padding': '15px', 'border-radius': '10px'}),
-                html.Div([
-                    html.H4("Total de Cashback Usado 🤑", style={'text-align': 'center', 'color': 'black'}),
-                    html.H3(formatar_valor(calcular_metricas()[3]), style={'text-align': 'center', 'color': '#008000'}),
-                    html.P("Valor total resgatado em benefícios de cashback.", style={'text-align': 'center', 'font-size': '12px'}),
-                ], className='card', style={'background-color': '#E8FFE8', 'border': '1px solid #008000', 'padding': '15px', 'border-radius': '10px'}),
-            ], style={'display': 'flex', 'justify-content': 'space-around', 'padding': '20px'}),
-        ], style={'background-color': '#F9F9F9'}),
+# Filtrar os dados
+dados_filtrados = transacoes if tipo_cartao == 'Todos' else transacoes[transacoes['Tipo_Cartão'] == tipo_cartao]
 
-        # Aba 2: Observações e Sugestões
-        dcc.Tab(label='Observações e Sugestões', children=[
-            html.Div([
-                html.H3("Observações e Sugestões", style={'text-align': 'center', 'margin-top': '30px'}),
-                html.Ul([
-                    html.Li("Clientes Gold têm maior concentração de gastos em 'Alimentação'. Sugerimos criar parcerias com redes de supermercados e restaurantes para oferecer cashback dedicado a essas transações."),
-                    html.Li("Clientes Black concentram seus gastos em 'Viagem'. Isso sugere a criação de promoções em passagens aéreas, hotéis e pacotes turísticos para reforçar a experiência premium."),
-                    html.Li("A região Sudeste concentra a maior parte dos inadimplentes. Uma recomendação seria realizar análises de crédito mais rigorosas nessa região e campanhas de educação financeira para os clientes."),
-                    html.Li("Clientes participantes de cashback gastam, em média, 30% mais por transação. Sugerimos expandir a campanha de cashback para outras categorias de gasto."),
-                    html.Li("A maioria dos clientes acumula pontos, mas não realiza resgates frequentes. É recomendável enviar notificações automáticas sobre saldo de pontos e campanhas para incentivá-los a resgatar benefícios."),
-                    html.Li("Categorias como 'Educação' apresentam potencial inexplorado. Promova campanhas de incentivo ao uso em cursos e assinaturas educacionais."),
-                ], style={'padding': '20px', 'font-size': '16px', 'line-height': '1.8'})
-            ], style={'padding': '20px'})
-        ], style={'background-color': '#F9F9F9'}),
-    ], style={'border': '1px solid #D3D3D3', 'border-radius': '10px', 'overflow': 'hidden'}),
-])
+# Métricas principais
+total_transacoes = formatar_valor(dados_filtrados['Valor_Transação'].sum())
+media_gasto = formatar_valor(dados_filtrados['Valor_Transação'].mean())
+total_inadimplentes = clientes['Status_Inadimplente'].sum()
+total_cashback = formatar_valor(
+    transacoes_completas[transacoes_completas['Participa_Cashback'] == 1]['Valor_Transação'].sum()
+)
 
-# Executa o servidor
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# Exibindo métricas
+st.subheader("Métricas Gerais")
+col1, col2, col3, col4 = st.columns(4)
+col1.metric("Total de Transações 💳", total_transacoes)
+col2.metric("Gasto Médio por Transação 📊", media_gasto)
+col3.metric("Total de Inadimplentes 🚨", f"{total_inadimplentes}")
+col4.metric("Total de Cashback Usado 🤑", total_cashback)
+
+# Gráfico de Gastos por Categoria
+st.subheader("Gastos por Categoria")
+grafico_categorias = dados_filtrados.groupby('Categoria_Gasto')['Valor_Transação'].sum().reset_index()
+fig_categoria = px.bar(
+    grafico_categorias,
+    x='Categoria_Gasto',
+    y='Valor_Transação',
+    text_auto=True,
+    title="Gastos por Categoria",
+    labels={'Categoria_Gasto': 'Categoria', 'Valor_Transação': 'Total (R$)'}
+)
+fig_categoria.update_layout(title_x=0.5)
+st.plotly_chart(fig_categoria, use_container_width=True)
+
+# Gráfico de Inadimplência por Região
+st.subheader("Distribuição de Inadimplência por Região")
+inadimplentes = clientes[clientes['Status_Inadimplente'] == 1]
+grafico_inadimplencia = inadimplentes.groupby('Região')['ID_Cliente'].count().reset_index()
+fig_inadimplencia = px.pie(
+    grafico_inadimplencia,
+    values='ID_Cliente',
+    names='Região',
+    title="Inadimplência por Região",
+    labels={'ID_Cliente': 'Clientes'},
+    color_discrete_sequence=px.colors.sequential.Reds
+)
+fig_inadimplencia.update_layout(title_x=0.5)
+st.plotly_chart(fig_inadimplencia, use_container_width=True)
+
+# Gráfico de Uso de Benefícios
+st.subheader("Uso de Benefícios")
+beneficios_uso = transacoes_completas.groupby(['Participa_Cashback', 'Participa_Pontos'])['Valor_Transação'].sum().reset_index()
+beneficios_uso['Benefício'] = beneficios_uso.apply(
+    lambda x: f"Cashback: {'Sim' if x['Participa_Cashback'] else 'Não'}, Pontos: {'Sim' if x['Participa_Pontos'] else 'Não'}", axis=1
+)
+fig_beneficios = px.bar(
+    beneficios_uso,
+    x='Benefício',
+    y='Valor_Transação',
+    text_auto=True,
+    title="Uso de Benefícios",
+    labels={'Valor_Transação': 'Total (R$)', 'Benefício': 'Benefício'}
+)
+fig_beneficios.update_layout(title_x=0.5)
+st.plotly_chart(fig_beneficios, use_container_width=True)
+
+# Observações e Sugestões
+st.subheader("Observações e Sugestões")
+st.write("""
+- **Clientes Gold** têm maior concentração de gastos em 'Alimentação'. Sugerimos criar parcerias com redes de restaurantes e supermercados para oferecer cashback dedicado a essas transações.
+- **Clientes Black** concentram maior parte dos gastos em 'Viagem'. Desenvolva promoções de passagens aéreas, hotéis e pacotes turísticos.
+- A **região Sudeste** concentra a maior parte dos inadimplentes. Reforce a análise de crédito e implemente campanhas de educação financeira nessa região.
+- **Clientes com cashback** gastam, em média, 30% mais. Expanda o programa para novas categorias.
+- Muitos clientes acumulam pontos, mas não realizam o resgate. Envie notificações automáticas e promova campanhas para incentivar o uso de pontos.
+""")

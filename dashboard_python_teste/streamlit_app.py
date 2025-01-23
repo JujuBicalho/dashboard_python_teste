@@ -5,10 +5,10 @@ from dash import dcc, html, Input, Output
 import pandas as pd
 import numpy as np
 import plotly.express as px
-import locale
 
-# Configurando o padrão brasileiro para formatação de números
-locale.setlocale(locale.LC_ALL, 'pt_BR.UTF-8')
+# Função para formatar valores no padrão brasileiro
+def formatar_valor(valor):
+    return f"R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
 
 # Criando os dados simulados
 transacoes = pd.DataFrame({
@@ -51,7 +51,6 @@ def calcular_metricas():
     return total_transacoes, media_gasto, total_inadimplentes, total_cashback
 
 # Layout do Dashboard
-# Layout do Dashboard
 app.layout = html.Div([
     # Título do Dashboard
     html.Div([
@@ -83,12 +82,12 @@ app.layout = html.Div([
             html.Div([
                 html.Div([
                     html.H4("Total de Transações 💳", style={'text-align': 'center', 'color': 'black'}),
-                    html.H3(f"R$ {calcular_metricas()[0]:,.2f}".replace('.', ',').replace(',', '.', 1), style={'text-align': 'center', 'color': '#003B70'}),
+                    html.H3(formatar_valor(calcular_metricas()[0]), style={'text-align': 'center', 'color': '#003B70'}),
                     html.P("Valor total movimentado por todas as transações no período.", style={'text-align': 'center', 'font-size': '12px'}),
                 ], className='card', style={'background-color': '#E8F4FF', 'border': '1px solid #003B70', 'padding': '15px', 'border-radius': '10px'}),
                 html.Div([
                     html.H4("Gasto Médio por Transação 📊", style={'text-align': 'center', 'color': 'black'}),
-                    html.H3(f"R$ {calcular_metricas()[1]:,.2f}".replace('.', ',').replace(',', '.', 1), style={'text-align': 'center', 'color': '#007ACC'}),
+                    html.H3(formatar_valor(calcular_metricas()[1]), style={'text-align': 'center', 'color': '#007ACC'}),
                     html.P("Média do valor gasto em cada transação.", style={'text-align': 'center', 'font-size': '12px'}),
                 ], className='card', style={'background-color': '#F0F8FF', 'border': '1px solid #007ACC', 'padding': '15px', 'border-radius': '10px'}),
                 html.Div([
@@ -98,17 +97,10 @@ app.layout = html.Div([
                 ], className='card', style={'background-color': '#FFE8E8', 'border': '1px solid #CC0000', 'padding': '15px', 'border-radius': '10px'}),
                 html.Div([
                     html.H4("Total de Cashback Usado 🤑", style={'text-align': 'center', 'color': 'black'}),
-                    html.H3(f"R$ {calcular_metricas()[3]:,.2f}".replace('.', ',').replace(',', '.', 1), style={'text-align': 'center', 'color': '#008000'}),
+                    html.H3(formatar_valor(calcular_metricas()[3]), style={'text-align': 'center', 'color': '#008000'}),
                     html.P("Valor total resgatado em benefícios de cashback.", style={'text-align': 'center', 'font-size': '12px'}),
                 ], className='card', style={'background-color': '#E8FFE8', 'border': '1px solid #008000', 'padding': '15px', 'border-radius': '10px'}),
             ], style={'display': 'flex', 'justify-content': 'space-around', 'padding': '20px'}),
-
-            # Gráficos
-            html.Div([
-                dcc.Graph(id='grafico_categorias'),
-                dcc.Graph(id='grafico_inadimplencia'),
-                dcc.Graph(id='grafico_beneficios'),
-            ], style={'padding': '20px'})
         ], style={'background-color': '#F9F9F9'}),
 
         # Aba 2: Observações e Sugestões
@@ -116,66 +108,17 @@ app.layout = html.Div([
             html.Div([
                 html.H3("Observações e Sugestões", style={'text-align': 'center', 'margin-top': '30px'}),
                 html.Ul([
-                    html.Li("Clientes Gold têm maior concentração de gastos em 'Alimentação'. Sugerimos criar parcerias com redes de restaurantes e oferecer cashback dedicado a essas transações."),
-                    html.Li("Clientes Black têm maior gasto em 'Viagem'. Isso sugere a criação de promoções em hotéis e companhias aéreas para reforçar a experiência premium."),
-                    html.Li("A região Sudeste concentra 70% dos inadimplentes. Uma recomendação seria realizar análises de crédito mais rigorosas nessa região e oferecer programas educativos sobre gestão financeira."),
-                    html.Li("60% dos clientes participantes de cashback gastam, em média, 25% mais por transação. Sugerimos expandir a campanha de cashback para outras categorias de gasto."),
-                    html.Li("A maioria dos clientes acumula pontos, mas não os resgata. É recomendável enviar alertas automáticos sobre vencimento de pontos e benefícios associados."),
+                    html.Li("Clientes Gold têm maior concentração de gastos em 'Alimentação'. Sugerimos criar parcerias com redes de supermercados e restaurantes para oferecer cashback dedicado a essas transações."),
+                    html.Li("Clientes Black concentram seus gastos em 'Viagem'. Isso sugere a criação de promoções em passagens aéreas, hotéis e pacotes turísticos para reforçar a experiência premium."),
+                    html.Li("A região Sudeste concentra a maior parte dos inadimplentes. Uma recomendação seria realizar análises de crédito mais rigorosas nessa região e campanhas de educação financeira para os clientes."),
+                    html.Li("Clientes participantes de cashback gastam, em média, 30% mais por transação. Sugerimos expandir a campanha de cashback para outras categorias de gasto."),
+                    html.Li("A maioria dos clientes acumula pontos, mas não realiza resgates frequentes. É recomendável enviar notificações automáticas sobre saldo de pontos e campanhas para incentivá-los a resgatar benefícios."),
+                    html.Li("Categorias como 'Educação' apresentam potencial inexplorado. Promova campanhas de incentivo ao uso em cursos e assinaturas educacionais."),
                 ], style={'padding': '20px', 'font-size': '16px', 'line-height': '1.8'})
             ], style={'padding': '20px'})
         ], style={'background-color': '#F9F9F9'}),
     ], style={'border': '1px solid #D3D3D3', 'border-radius': '10px', 'overflow': 'hidden'}),
 ])
-
-
-# Callbacks para os gráficos
-@app.callback(
-    Output('grafico_categorias', 'figure'),
-    Input('tipo_cartao', 'value')
-)
-def update_grafico_categorias(tipo_cartao):
-    dados = transacoes if tipo_cartao == 'Todos' else transacoes[transacoes['Tipo_Cartão'] == tipo_cartao]
-    categoria_gasto = dados.groupby('Categoria_Gasto')['Valor_Transação'].sum().reset_index()
-    fig = px.bar(categoria_gasto, x='Categoria_Gasto', y='Valor_Transação',
-                 title="Gastos por Categoria",
-                 labels={'Categoria_Gasto': 'Categoria', 'Valor_Transação': 'Total (R$)'},
-                 text_auto=True,
-                 color_discrete_sequence=['#003B70'])
-    fig.update_layout(title_x=0.5)
-    return fig
-
-@app.callback(
-    Output('grafico_inadimplencia', 'figure'),
-    Input('tipo_cartao', 'value')
-)
-def update_grafico_inadimplencia(tipo_cartao):
-    inadimplentes = clientes[clientes['Status_Inadimplente'] == 1]
-    if tipo_cartao != 'Todos':
-        inadimplentes = inadimplentes[inadimplentes['Tipo_Cartão'] == tipo_cartao]
-    inadimplencia_regiao = inadimplentes.groupby('Região')['ID_Cliente'].count().reset_index()
-    fig = px.pie(inadimplencia_regiao, values='ID_Cliente', names='Região',
-                 title="Distribuição de Inadimplência por Região",
-                 labels={'ID_Cliente': 'Clientes'},
-                 color_discrete_sequence=px.colors.sequential.Blues)
-    fig.update_layout(title_x=0.5)
-    return fig
-
-@app.callback(
-    Output('grafico_beneficios', 'figure'),
-    Input('tipo_cartao', 'value')
-)
-def update_grafico_beneficios(tipo_cartao):
-    dados = transacoes_completas if tipo_cartao == 'Todos' else transacoes_completas[transacoes_completas['Tipo_Cartão'] == tipo_cartao]
-    beneficios_uso = dados.groupby(['Participa_Cashback', 'Participa_Pontos'])['Valor_Transação'].sum().reset_index()
-    beneficios_uso['Beneficio'] = beneficios_uso.apply(
-        lambda x: f"Cashback: {'Sim' if x['Participa_Cashback'] else 'Não'}, Pontos: {'Sim' if x['Participa_Pontos'] else 'Não'}", axis=1)
-    fig = px.bar(beneficios_uso, x='Beneficio', y='Valor_Transação',
-                 title="Uso de Benefícios",
-                 labels={'Valor_Transação': 'Total (R$)', 'Beneficio': 'Benefício'},
-                 text_auto=True,
-                 color_discrete_sequence=['#003B70'])
-    fig.update_layout(title_x=0.5)
-    return fig
 
 # Executa o servidor
 if __name__ == '__main__':

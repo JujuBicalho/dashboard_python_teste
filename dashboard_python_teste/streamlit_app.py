@@ -36,8 +36,23 @@ def formatar_valor(valor):
     return f"R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
 
 # Título do app
-st.title("Dashboard de Cartões de Crédito")
-st.write("Análise de transações, inadimplência e benefícios")
+st.markdown(
+    """
+    <style>
+    .title {
+        text-align: center;
+        color: white;
+        background-color: #003B70;
+        padding: 15px;
+        border-radius: 5px;
+        font-size: 30px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+st.markdown('<div class="title">Dashboard de Cartões de Crédito</div>', unsafe_allow_html=True)
+st.subheader("Análise de transações, inadimplência e benefícios")
 
 # Filtros
 tipo_cartao = st.selectbox(
@@ -56,15 +71,60 @@ total_cashback = formatar_valor(
     transacoes_completas[transacoes_completas['Participa_Cashback'] == 1]['Valor_Transação'].sum()
 )
 
-# Exibindo métricas
-st.subheader("Métricas Gerais")
+# Exibindo métricas com design restaurado
+st.markdown("### Métricas Gerais")
 col1, col2, col3, col4 = st.columns(4)
-col1.metric("Total de Transações 💳", total_transacoes)
-col2.metric("Gasto Médio por Transação 📊", media_gasto)
-col3.metric("Total de Inadimplentes 🚨", f"{total_inadimplentes}")
-col4.metric("Total de Cashback Usado 🤑", total_cashback)
 
-# Gráfico de Gastos por Categoria
+with col1:
+    st.markdown(
+        f"""
+        <div style="background-color:#E8F4FF; padding:10px; border-radius:10px; text-align:center; border:1px solid #003B70;">
+            <h4 style="color:#003B70;">Total de Transações 💳</h4>
+            <h2 style="color:#003B70;">{total_transacoes}</h2>
+            <p>Valor total movimentado por todas as transações no período.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with col2:
+    st.markdown(
+        f"""
+        <div style="background-color:#F0F8FF; padding:10px; border-radius:10px; text-align:center; border:1px solid #007ACC;">
+            <h4 style="color:#007ACC;">Gasto Médio por Transação 📊</h4>
+            <h2 style="color:#007ACC;">{media_gasto}</h2>
+            <p>Média do valor gasto em cada transação.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with col3:
+    st.markdown(
+        f"""
+        <div style="background-color:#FFE8E8; padding:10px; border-radius:10px; text-align:center; border:1px solid #CC0000;">
+            <h4 style="color:#CC0000;">Total de Inadimplentes 🚨</h4>
+            <h2 style="color:#CC0000;">{total_inadimplentes}</h2>
+            <p>Número de clientes inadimplentes no período analisado.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+with col4:
+    st.markdown(
+        f"""
+        <div style="background-color:#E8FFE8; padding:10px; border-radius:10px; text-align:center; border:1px solid #008000;">
+            <h4 style="color:#008000;">Total de Cashback Usado 🤑</h4>
+            <h2 style="color:#008000;">{total_cashback}</h2>
+            <p>Valor total resgatado em benefícios de cashback.</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+# Gráficos
+st.markdown("### Gráficos")
 st.subheader("Gastos por Categoria")
 grafico_categorias = dados_filtrados.groupby('Categoria_Gasto')['Valor_Transação'].sum().reset_index()
 fig_categoria = px.bar(
@@ -78,7 +138,6 @@ fig_categoria = px.bar(
 fig_categoria.update_layout(title_x=0.5)
 st.plotly_chart(fig_categoria, use_container_width=True)
 
-# Gráfico de Inadimplência por Região
 st.subheader("Distribuição de Inadimplência por Região")
 inadimplentes = clientes[clientes['Status_Inadimplente'] == 1]
 grafico_inadimplencia = inadimplentes.groupby('Região')['ID_Cliente'].count().reset_index()
@@ -92,30 +151,3 @@ fig_inadimplencia = px.pie(
 )
 fig_inadimplencia.update_layout(title_x=0.5)
 st.plotly_chart(fig_inadimplencia, use_container_width=True)
-
-# Gráfico de Uso de Benefícios
-st.subheader("Uso de Benefícios")
-beneficios_uso = transacoes_completas.groupby(['Participa_Cashback', 'Participa_Pontos'])['Valor_Transação'].sum().reset_index()
-beneficios_uso['Benefício'] = beneficios_uso.apply(
-    lambda x: f"Cashback: {'Sim' if x['Participa_Cashback'] else 'Não'}, Pontos: {'Sim' if x['Participa_Pontos'] else 'Não'}", axis=1
-)
-fig_beneficios = px.bar(
-    beneficios_uso,
-    x='Benefício',
-    y='Valor_Transação',
-    text_auto=True,
-    title="Uso de Benefícios",
-    labels={'Valor_Transação': 'Total (R$)', 'Benefício': 'Benefício'}
-)
-fig_beneficios.update_layout(title_x=0.5)
-st.plotly_chart(fig_beneficios, use_container_width=True)
-
-# Observações e Sugestões
-st.subheader("Observações e Sugestões")
-st.write("""
-- **Clientes Gold** têm maior concentração de gastos em 'Alimentação'. Sugerimos criar parcerias com redes de restaurantes e supermercados para oferecer cashback dedicado a essas transações.
-- **Clientes Black** concentram maior parte dos gastos em 'Viagem'. Desenvolva promoções de passagens aéreas, hotéis e pacotes turísticos.
-- A **região Sudeste** concentra a maior parte dos inadimplentes. Reforce a análise de crédito e implemente campanhas de educação financeira nessa região.
-- **Clientes com cashback** gastam, em média, 30% mais. Expanda o programa para novas categorias.
-- Muitos clientes acumulam pontos, mas não realizam o resgate. Envie notificações automáticas e promova campanhas para incentivar o uso de pontos.
-""")

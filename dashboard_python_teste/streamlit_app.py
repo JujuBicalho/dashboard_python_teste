@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -35,14 +36,14 @@ transacoes_completas = pd.merge(transacoes, beneficios, on='ID_Cliente')
 def formatar_valor(valor):
     return f"R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
 
-# Estilo CSS para responsividade completa
+# Estilo CSS para centralizar e organizar o layout
 st.markdown(
     """
     <style>
     .main-container {
-        width: 100%;
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 0 10px;
+        padding: 0 20px;
     }
     .title {
         text-align: center;
@@ -51,18 +52,17 @@ st.markdown(
         padding: 15px;
         border-radius: 5px;
         font-size: 2em;
+        margin-bottom: 20px;
     }
-    .metric-row {
+    .metric-container {
         display: flex;
-        flex-wrap: wrap;
         justify-content: space-between;
-        gap: 10px;
-        margin-top: 20px;
+        gap: 20px;
+        flex-wrap: wrap;
     }
     .metric-card {
         flex: 1;
-        min-width: 200px;
-        max-width: 23%;
+        min-width: 220px;
         background-color: #f9f9f9;
         padding: 15px;
         border-radius: 10px;
@@ -75,7 +75,9 @@ st.markdown(
 )
 
 # Layout principal
+st.markdown('<div class="main-container">', unsafe_allow_html=True)
 st.markdown('<div class="title">Dashboard de Cartões de Crédito</div>', unsafe_allow_html=True)
+
 st.subheader("Análise de transações, inadimplência e benefícios")
 
 # Filtros
@@ -95,72 +97,77 @@ total_cashback = formatar_valor(
     transacoes_completas[transacoes_completas['Participa_Cashback'] == 1]['Valor_Transação'].sum()
 )
 
-# Exibindo métricas com layout responsivo
+# Exibindo métricas centralizadas
 st.markdown("### Métricas Gerais")
+st.markdown('<div class="metric-container">', unsafe_allow_html=True)
 st.markdown(
     f"""
-    <div class="metric-row">
-        <div class="metric-card" style="background-color: #E8F4FF;">
-            <h4>Total de Transações 💳</h4>
-            <h2>{total_transacoes}</h2>
-            <p>Valor total movimentado no período.</p>
-        </div>
-        <div class="metric-card" style="background-color: #F0F8FF;">
-            <h4>Gasto Médio por Transação 📊</h4>
-            <h2>{media_gasto}</h2>
-            <p>Média do valor gasto por transação.</p>
-        </div>
-        <div class="metric-card" style="background-color: #FFE8E8;">
-            <h4>Total de Inadimplentes 🚨</h4>
-            <h2>{total_inadimplentes}</h2>
-            <p>Número de clientes inadimplentes.</p>
-        </div>
-        <div class="metric-card" style="background-color: #E8FFE8;">
-            <h4>Total de Cashback Usado 🤑</h4>
-            <h2>{total_cashback}</h2>
-            <p>Total resgatado em benefícios.</p>
-        </div>
+    <div class="metric-card" style="background-color: #E8F4FF;">
+        <h4>Total de Transações 💳</h4>
+        <h2>{total_transacoes}</h2>
+        <p>Valor total movimentado no período.</p>
     </div>
     """,
     unsafe_allow_html=True
 )
+st.markdown(
+    f"""
+    <div class="metric-card" style="background-color: #F0F8FF;">
+        <h4>Gasto Médio por Transação 📊</h4>
+        <h2>{media_gasto}</h2>
+        <p>Média do valor gasto por transação.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+st.markdown(
+    f"""
+    <div class="metric-card" style="background-color: #FFE8E8;">
+        <h4>Total de Inadimplentes 🚨</h4>
+        <h2>{total_inadimplentes}</h2>
+        <p>Número de clientes inadimplentes.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+st.markdown(
+    f"""
+    <div class="metric-card" style="background-color: #E8FFE8;">
+        <h4>Total de Cashback Usado 🤑</h4>
+        <h2>{total_cashback}</h2>
+        <p>Total resgatado em benefícios.</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Abas
-tab1, tab2 = st.tabs(["Análises Gráficas", "Observações e Sugestões"])
+# Gráficos
+st.subheader("Gráficos")
+grafico_categorias = dados_filtrados.groupby('Categoria_Gasto')['Valor_Transação'].sum().reset_index()
+fig_categoria = px.bar(
+    grafico_categorias,
+    x='Categoria_Gasto',
+    y='Valor_Transação',
+    text_auto=True,
+    title="Gastos por Categoria",
+    labels={'Categoria_Gasto': 'Categoria', 'Valor_Transação': 'Total (R$)'}
+)
+fig_categoria.update_layout(title_x=0.5)
+st.plotly_chart(fig_categoria, use_container_width=True)
 
-with tab1:
-    st.subheader("Gastos por Categoria")
-    grafico_categorias = dados_filtrados.groupby('Categoria_Gasto')['Valor_Transação'].sum().reset_index()
-    fig_categoria = px.bar(
-        grafico_categorias,
-        x='Categoria_Gasto',
-        y='Valor_Transação',
-        text_auto=True,
-        title="Gastos por Categoria",
-        labels={'Categoria_Gasto': 'Categoria', 'Valor_Transação': 'Total (R$)'}
-    )
-    fig_categoria.update_layout(title_x=0.5)
-    st.plotly_chart(fig_categoria, use_container_width=True)
+st.subheader("Distribuição de Inadimplência por Região")
+inadimplentes = clientes[clientes['Status_Inadimplente'] == 1]
+grafico_inadimplencia = inadimplentes.groupby('Região')['ID_Cliente'].count().reset_index()
+fig_inadimplencia = px.pie(
+    grafico_inadimplencia,
+    values='ID_Cliente',
+    names='Região',
+    title="Inadimplência por Região",
+    labels={'ID_Cliente': 'Clientes'},
+    color_discrete_sequence=px.colors.sequential.Reds
+)
+fig_inadimplencia.update_layout(title_x=0.5)
+st.plotly_chart(fig_inadimplencia, use_container_width=True)
 
-    st.subheader("Distribuição de Inadimplência por Região")
-    inadimplentes = clientes[clientes['Status_Inadimplente'] == 1]
-    grafico_inadimplencia = inadimplentes.groupby('Região')['ID_Cliente'].count().reset_index()
-    fig_inadimplencia = px.pie(
-        grafico_inadimplencia,
-        values='ID_Cliente',
-        names='Região',
-        title="Inadimplência por Região",
-        labels={'ID_Cliente': 'Clientes'},
-        color_discrete_sequence=px.colors.sequential.Reds
-    )
-    fig_inadimplencia.update_layout(title_x=0.5)
-    st.plotly_chart(fig_inadimplencia, use_container_width=True)
-
-with tab2:
-    st.subheader("Observações e Sugestões")
-    st.write("""
-    - **Clientes Gold** gastam mais em 'Alimentação'. Sugerimos criar parcerias com supermercados e restaurantes.
-    - **Clientes Black** concentram gastos em 'Viagem'. Promoções de hotéis e passagens podem atrair mais clientes.
-    - **Sudeste** concentra a maior parte dos inadimplentes. Reforce a análise de crédito nessa região.
-    - Clientes participantes de **cashback** gastam 30% mais. Expanda o programa para novas categorias.
-    """)
+st.markdown('</div>', unsafe_allow_html=True)

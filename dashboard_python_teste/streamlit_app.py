@@ -130,7 +130,7 @@ st.markdown(
 )
 
 # Gráficos
-st.markdown("### Gráficos")
+#st.markdown("### Gráficos")
 st.subheader("Gastos por Categoria")
 grafico_categorias = dados_filtrados.groupby('Categoria_Gasto')['Valor_Transação'].sum().reset_index()
 fig_categoria = px.bar(
@@ -138,20 +138,20 @@ fig_categoria = px.bar(
     x='Categoria_Gasto',
     y='Valor_Transação',
     text_auto=True,
-    title="Gastos por Categoria",
+    #title="Gastos por Categoria",
     labels={'Categoria_Gasto': 'Categoria', 'Valor_Transação': 'Total (R$)'}
 )
 fig_categoria.update_layout(title_x=0.5)
 st.plotly_chart(fig_categoria, use_container_width=True)
 
-st.subheader("Distribuição de Inadimplência por Região")
+st.subheader("Inadimplência por Região")
 inadimplentes = clientes[clientes['Status_Inadimplente'] == 1]
 grafico_inadimplencia = inadimplentes.groupby('Região')['ID_Cliente'].count().reset_index()
 fig_inadimplencia = px.pie(
     grafico_inadimplencia,
     values='ID_Cliente',
     names='Região',
-    title="Inadimplência por Região",
+    #title="Inadimplência por Região",
     labels={'ID_Cliente': 'Clientes'},
     color_discrete_sequence=px.colors.sequential.Reds
 )

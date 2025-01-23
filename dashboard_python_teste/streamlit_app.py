@@ -1,3 +1,4 @@
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -35,7 +36,7 @@ transacoes_completas = pd.merge(transacoes, beneficios, on='ID_Cliente')
 def formatar_valor(valor):
     return f"R$ {valor:,.2f}".replace(',', 'X').replace('.', ',').replace('X', '.')
 
-# Título do app
+# Estilo CSS para responsividade
 st.markdown(
     """
     <style>
@@ -45,12 +46,40 @@ st.markdown(
         background-color: #003B70;
         padding: 15px;
         border-radius: 5px;
-        font-size: 30px;
+        font-size: 2em;
+    }
+    .metric-card {
+        background-color: #f9f9f9;
+        padding: 10px;
+        border-radius: 10px;
+        margin: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+        flex: 1 1 calc(25% - 20px);
+        box-sizing: border-box;
+    }
+    .metric-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+    .metric-title {
+        font-size: 1.2em;
+        margin-bottom: 5px;
+        color: #333;
+    }
+    .metric-value {
+        font-size: 2em;
+        font-weight: bold;
+        margin: 10px 0;
+        color: #003B70;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
+# Título do app
 st.markdown('<div class="title">Dashboard de Cartões de Crédito</div>', unsafe_allow_html=True)
 st.subheader("Análise de transações, inadimplência e benefícios")
 
@@ -71,57 +100,35 @@ total_cashback = formatar_valor(
     transacoes_completas[transacoes_completas['Participa_Cashback'] == 1]['Valor_Transação'].sum()
 )
 
-# Exibindo métricas com design restaurado
+# Exibindo métricas responsivas
 st.markdown("### Métricas Gerais")
-col1, col2, col3, col4 = st.columns(4)
-
-with col1:
-    st.markdown(
-        f"""
-        <div style="background-color:#E8F4FF; padding:10px; border-radius:10px; text-align:center; border:1px solid #003B70;">
-            <h4 style="color:#003B70;">Total de Transações 💳</h4>
-            <h2 style="color:#003B70;">{total_transacoes}</h2>
-            <p>Valor total movimentado por todas as transações no período.</p>
+st.markdown(
+    f"""
+    <div class="metric-row">
+        <div class="metric-card" style="background-color: #E8F4FF;">
+            <div class="metric-title">Total de Transações 💳</div>
+            <div class="metric-value">{total_transacoes}</div>
+            <small>Valor total movimentado no período.</small>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with col2:
-    st.markdown(
-        f"""
-        <div style="background-color:#F0F8FF; padding:10px; border-radius:10px; text-align:center; border:1px solid #007ACC;">
-            <h4 style="color:#007ACC;">Gasto Médio por Transação 📊</h4>
-            <h2 style="color:#007ACC;">{media_gasto}</h2>
-            <p>Média do valor gasto em cada transação.</p>
+        <div class="metric-card" style="background-color: #F0F8FF;">
+            <div class="metric-title">Gasto Médio por Transação 📊</div>
+            <div class="metric-value">{media_gasto}</div>
+            <small>Média do valor gasto por transação.</small>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with col3:
-    st.markdown(
-        f"""
-        <div style="background-color:#FFE8E8; padding:10px; border-radius:10px; text-align:center; border:1px solid #CC0000;">
-            <h4 style="color:#CC0000;">Total de Inadimplentes 🚨</h4>
-            <h2 style="color:#CC0000;">{total_inadimplentes}</h2>
-            <p>Número de clientes inadimplentes no período analisado.</p>
+        <div class="metric-card" style="background-color: #FFE8E8;">
+            <div class="metric-title">Total de Inadimplentes 🚨</div>
+            <div class="metric-value">{total_inadimplentes}</div>
+            <small>Número de clientes inadimplentes.</small>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-with col4:
-    st.markdown(
-        f"""
-        <div style="background-color:#E8FFE8; padding:10px; border-radius:10px; text-align:center; border:1px solid #008000;">
-            <h4 style="color:#008000;">Total de Cashback Usado 🤑</h4>
-            <h2 style="color:#008000;">{total_cashback}</h2>
-            <p>Valor total resgatado em benefícios de cashback.</p>
+        <div class="metric-card" style="background-color: #E8FFE8;">
+            <div class="metric-title">Total de Cashback Usado 🤑</div>
+            <div class="metric-value">{total_cashback}</div>
+            <small>Total resgatado em benefícios.</small>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 # Gráficos
 st.markdown("### Gráficos")

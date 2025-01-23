@@ -168,8 +168,8 @@ with tab1:
 with tab2:
     st.subheader("Sugestões e Observações")
     st.write("""
-    - Clientes **Gold** têm maior concentração de gastos em 'Alimentação'. Parcerias com restaurantes podem aumentar a fidelidade.
-    - Clientes **Black** gastam mais em 'Viagem'. Promoções em hotéis e passagens podem atrair novos clientes.
-    - A região **Sudeste** concentra a maior parte dos inadimplentes. Reforce análises de crédito e políticas na região.
+    - Clientes **Gold** e **Black** têm maior concentração de gastos em 'Alimentação'. **Sugestão:** Parcerias com restaurantes podem aumentar a fidelidade.
+    - Clientes **Platinum** gastam mais em 'Compras Online'. **Sugestão:** Parcerias com cashback e descontos em lojas online.
+    - A região **Norte** concentra a maior parte dos inadimplentes. **Sugestão:** Reforce análises de crédito e políticas na região.
     - **Cashback** é atrativo: participantes gastam, em média, 25% a mais. Expanda para outras categorias.
     """)

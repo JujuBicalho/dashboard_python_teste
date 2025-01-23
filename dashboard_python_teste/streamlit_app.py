@@ -91,67 +91,73 @@ tipo_cartao = st.selectbox(
 # Filtrar os dados
 dados_filtrados = transacoes if tipo_cartao == 'Todos' else transacoes[transacoes['Tipo_Cartão'] == tipo_cartao]
 
-# Métricas principais
-total_transacoes = formatar_valor(dados_filtrados['Valor_Transação'].sum())
-media_gasto = formatar_valor(dados_filtrados['Valor_Transação'].mean())
-total_inadimplentes = clientes['Status_Inadimplente'].sum()
-total_cashback = formatar_valor(
-    transacoes_completas[transacoes_completas['Participa_Cashback'] == 1]['Valor_Transação'].sum()
-)
+# Criando as abas
+tab1, tab2 = st.tabs(["Métricas e Gráficos", "Sugestões e Observações"])
 
-# Exibindo métricas responsivas
-st.markdown(
-    f"""
-    <div class="metric-row">
-        <div class="metric-card" style="background-color: #E8F4FF;">
-            <div class="metric-title">Total de Transações 💳</div>
-            <div class="metric-value">{total_transacoes}</div>
-            <small>Valor total movimentado no período.</small>
+# Conteúdo da aba 1
+with tab1:
+    # Métricas principais
+    st.markdown(
+        f"""
+        <div class="metric-row">
+            <div class="metric-card" style="background-color: #E8F4FF;">
+                <div class="metric-title">Total de Transações 💳</div>
+                <div class="metric-value">{formatar_valor(dados_filtrados['Valor_Transação'].sum())}</div>
+                <small>Valor total movimentado no período.</small>
+            </div>
+            <div class="metric-card" style="background-color: #F0F8FF;">
+                <div class="metric-title">Gasto Médio por Transação 📊</div>
+                <div class="metric-value">{formatar_valor(dados_filtrados['Valor_Transação'].mean())}</div>
+                <small>Média do valor gasto por transação.</small>
+            </div>
+            <div class="metric-card" style="background-color: #FFE8E8;">
+                <div class="metric-title">Total de Inadimplentes 🚨</div>
+                <div class="metric-value">{clientes['Status_Inadimplente'].sum()}</div>
+                <small>Número de clientes inadimplentes.</small>
+            </div>
+            <div class="metric-card" style="background-color: #E8FFE8;">
+                <div class="metric-title">Total de Cashback Usado 🤑</div>
+                <div class="metric-value">{formatar_valor(transacoes_completas[transacoes_completas['Participa_Cashback'] == 1]['Valor_Transação'].sum())}</div>
+                <small>Total resgatado em benefícios.</small>
+            </div>
         </div>
-        <div class="metric-card" style="background-color: #F0F8FF;">
-            <div class="metric-title">Gasto Médio por Transação 📊</div>
-            <div class="metric-value">{media_gasto}</div>
-            <small>Média do valor gasto por transação.</small>
-        </div>
-        <div class="metric-card" style="background-color: #FFE8E8;">
-            <div class="metric-title">Total de Inadimplentes 🚨</div>
-            <div class="metric-value">{total_inadimplentes}</div>
-            <small>Número de clientes inadimplentes.</small>
-        </div>
-        <div class="metric-card" style="background-color: #E8FFE8;">
-            <div class="metric-title">Total de Cashback Usado 🤑</div>
-            <div class="metric-value">{total_cashback}</div>
-            <small>Total resgatado em benefícios.</small>
-        </div>
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+        """,
+        unsafe_allow_html=True
+    )
 
-# Gráficos
-st.subheader("Gastos por Categoria")
-grafico_categorias = dados_filtrados.groupby('Categoria_Gasto')['Valor_Transação'].sum().reset_index()
-fig_categoria = px.bar(
-    grafico_categorias,
-    x='Categoria_Gasto',
-    y='Valor_Transação',
-    text_auto=True,
-    #title="Gastos por Categoria",
-    labels={'Categoria_Gasto': 'Categoria', 'Valor_Transação': 'Total (R$)'}
-)
-fig_categoria.update_layout(title_x=0.5)
-st.plotly_chart(fig_categoria, use_container_width=True)
+    # Gráficos
+    st.subheader("Gastos por Categoria")
+    grafico_categorias = dados_filtrados.groupby('Categoria_Gasto')['Valor_Transação'].sum().reset_index()
+    fig_categoria = px.bar(
+        grafico_categorias,
+        x='Categoria_Gasto',
+        y='Valor_Transação',
+        text_auto=True,
+        labels={'Categoria_Gasto': 'Categoria', 'Valor_Transação': 'Total (R$)'}
+    )
+    fig_categoria.update_layout(title_x=0.5)
+    st.plotly_chart(fig_categoria, use_container_width=True)
 
-st.subheader("Inadimplência por Região")
-inadimplentes = clientes[clientes['Status_Inadimplente'] == 1]
-grafico_inadimplencia = inadimplentes.groupby('Região')['ID_Cliente'].count().reset_index()
-fig_inadimplencia = px.pie(
-    grafico_inadimplencia,
-    values='ID_Cliente',
-    names='Região',
-    #title="Inadimplência por Região",
-    labels={'ID_Cliente': 'Clientes'},
-    color_discrete_sequence=px.colors.sequential.Reds
-)
-fig_inadimplencia.update_layout(title_x=0.5)
-st.plotly_chart(fig_inadimplencia, use_container_width=True)
+    st.subheader("Inadimplência por Região")
+    inadimplentes = clientes[clientes['Status_Inadimplente'] == 1]
+    grafico_inadimplencia = inadimplentes.groupby('Região')['ID_Cliente'].count().reset_index()
+    fig_inadimplencia = px.pie(
+        grafico_inadimplencia,
+        values='ID_Cliente',
+        names='Região',
+        labels={'ID_Cliente': 'Clientes'},
+        color_discrete_sequence=px.colors.sequential.Reds
+    )
+    fig_inadimplencia.update_layout(title_x=0.5)
+    st.plotly_chart(fig_inadimplencia, use_container_width=True)
+
+# Conteúdo da aba 2
+with tab2:
+    st.subheader("Sugestões e Observações")
+    st.write("""
+    - Clientes **Gold** têm maior concentração de gastos em 'Alimentação'. Parcerias com restaurantes podem aumentar a fidelidade.
+    - Clientes **Black** gastam mais em 'Viagem'. Promoções em hotéis e passagens podem atrair novos clientes.
+    - A região **Sudeste** concentra a maior parte dos inadimplentes. Reforce análises de crédito e políticas na região.
+    - **Cashback** é atrativo: participantes gastam, em média, 25% a mais. Expanda para outras categorias.
+    """)
+
